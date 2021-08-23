@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bot for MM
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  try to take over the world!
 // @author       DylanDelobel
 // @match        https://www.mintopoly.io/dashboard
@@ -9,12 +9,12 @@
 // @grant        none
 // @downloadURL  https://raw.githubusercontent.com/DylanDelobel/mm-bot/master/mm-bot.user.js
 // @updateURL    https://raw.githubusercontent.com/DylanDelobel/mm-bot/master/mm-bot.user.js
-// @require http://code.jquery.com/jquery-3.4.1.min.js
+// @require      https://code.jquery.com/jquery-3.4.1.min.js
 // ==/UserScript==
 
 (function () {
     'use strict';
-    let miningRig, validatorNode, oracle, smartContract
+    let execCount = 0;
     let Investments = {
         miningRig: {'name': 'Mining Rig'},
         validatorNode: {'name': 'Validator Node'},
@@ -24,6 +24,7 @@
         decentralizedExchange: {'name': 'Decentralized Exchange'},
         centralizedExchange: {'name': 'Centralized Exchange'},
     };
+
 
     // ===== Functions
     function getRandomInt(max) {
@@ -69,37 +70,71 @@
         }
     }
 
+    function getCurrentCashBalance() {
+        let cashtxt = $('p:contains("cash balance")')[0];
+        let balance = $(cashtxt).parent().find('h3')[0];
+        return Number($(balance).text());
+    }
+
+    function stack(amountToStack) {
+        let depoSlider = $('span.MuiSlider-track')[0];
+        let depoInput = $(depoSlider).next('input');
+        $(depoInput).val(amountToStack);
+        //$("button:contains('deposit')")
+    }
+
+    function canIStack() {
+        let stackMsg = $('span:contains("You can stake again in...")');
+        if (stackMsg.length === 1) {
+            return false;
+        }
+        return true;
+    }
+
 
     setInterval(() => {
         // ===== Setup
-        console.log('setup');
+        execCount++;
+        console.log("Executed " + execCount + " times");
+        if (execCount === 250) {
+            location.reload()
+        }
+
+        let totalBought = 0;
         for (const [key, val] of Object.entries(Investments)) {
             val.count = getCountOfInvestments(val.name);
-            console.log(val);
+            totalBought += val.count;
         }
+
+        // if (totalBought > 450) {
+        //     // check if I can stack
+        //     if (canIStack()) {
+        //         stack(getCurrentCashBalance());
+        //         //location.reload();
+        //     }
+        // }
 
         // ===== Logic
-        if (Investments.miningRig.count < 50) {
-            buyOneInvestments(Investments.miningRig.name);
-        }
-        if (Investments.validatorNode.count < 40) {
-            buyOneInvestments(Investments.validatorNode.name);
-        }
-        if (Investments.oracle.count < 30) {
-            buyOneInvestments(Investments.oracle.name);
-        }
-        if (Investments.smartContract.count < 25) {
-            buyOneInvestments(Investments.smartContract.name);
-        }
-        if (Investments.automatedTradingBot.count < 20) {
-            buyOneInvestments(Investments.automatedTradingBot.name);
-        }
-        if (Investments.decentralizedExchange.count < 15) {
-            buyOneInvestments(Investments.decentralizedExchange.name);
-        }
-        if (Investments.centralizedExchange.count < 50) {
+        if (Investments.centralizedExchange.count < 48) {
             buyOneInvestments(Investments.centralizedExchange.name);
         }
-
+        if (Investments.decentralizedExchange.count < 40) {
+            buyOneInvestments(Investments.decentralizedExchange.name);
+        }
+        if (Investments.automatedTradingBot.count < 46) {
+            buyOneInvestments(Investments.automatedTradingBot.name);
+        }
+        if (Investments.smartContract.count < 45) {
+            buyOneInvestments(Investments.smartContract.name);
+        }
+        if (Investments.oracle.count < 63) {
+            buyOneInvestments(Investments.oracle.name);
+        }
+        if (Investments.validatorNode.count < 67) {
+            buyOneInvestments(Investments.validatorNode.name);
+        }
+        if (Investments.miningRig.count < 130) {
+            buyOneInvestments(Investments.miningRig.name);
+        }
     }, 4000 + getRandomInt(1000));
 })();
